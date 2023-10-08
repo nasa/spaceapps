@@ -1,9 +1,9 @@
 # spaceapps
 ## SOLVE REAL-WORLD CHALLENGES ON EARTH & IN SPACE
-The NASA International Space Apps Challenge is a hackathon for coders, scientists, designers, storytellers, makers, technologists, and innovators around the world to come together and use open data from NASA and its Space Agency Partners to create solutions to challenges we face on Earth and in space.
+Welcome to the NASA International Space Apps Challenge! This hackathon brings together coders, scientists, designers, storytellers, makers, technologists, and innovators worldwide. We'll be using open data from NASA and its Space Agency Partners to tackle challenges both on Earth and in space.
 
 ## TERMS & CONDITIONS
-By participating in Discussions within this repository, you are confirming that you have [registered](https://www.spaceappschallenge.org/2023/) for the 2023 NASA International Space Apps Hackathon and have agreed to and signed the [Terms & Conditions](https://www.spaceappschallenge.org/legal/).
+To participate in Discussions within this repository, make sure you're [registered](https://www.spaceappschallenge.org/2023/) for the 2023 NASA International Space Apps Hackathon. Please review and agree to the [Terms & Conditions](https://www.spaceappschallenge.org/legal/).
 
 ## IF YOU SEE SOMETHING, SAY SOMETHING
-If you experience or witness discrimination, harassment, or any form of bullying during the Space Apps Challenge, or have any other concerns, please contact your Local Lead and/or the Space Apps Global Organizing (GO) Team at conduct@spaceappschallenge.org
+If you encounter discrimination, harassment, or any form of bullying during the Space Apps Challenge, or if you have any other concerns, please reach out to your Local Lead or contact the Space Apps Global Organizing (GO) Team at conduct@spaceappschallenge.org
