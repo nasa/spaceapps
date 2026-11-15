@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lunar Site Planner · NASA Space Apps Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@700;800;900&family=Overpass:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+
+<div id="splash">
+  <canvas id="splashMoon"></canvas>
+  <div class="splash-vignette"></div>
+  <div class="splash-content">
+    <div class="lockup lockup-hero">
+      <svg class="logo-mark" viewBox="0 0 96 96" aria-label="NASA Space Apps Challenge">
+        <circle cx="40" cy="58" r="28" fill="none" stroke="currentColor" stroke-width="5"/>
+        <circle cx="59" cy="27" r="9.5" fill="none" stroke="currentColor" stroke-width="5"/>
+        <g stroke="currentColor" stroke-width="4" stroke-linecap="round">
+          <line x1="64" y1="20" x2="72" y2="7"/>
+          <line x1="70" y1="24" x2="84" y2="16"/>
+          <line x1="60" y1="16" x2="63" y2="3"/>
+          <line x1="76" y1="19" x2="88" y2="9"/>
+        </g>
+      </svg>
+      <div class="logo-type">
+        <span class="nasa">NASA</span>
+        <span class="spaceapps">SPACE APPS</span>
+        <span class="challenge">CHALLENGE</span>
+      </div>
+    </div>
+    <h1 class="splash-title">Lunar Site Planner</h1>
+    <p class="splash-sub">Sunlight, Earth visibility and raytraced terrain for the lunar south pole</p>
+    <button id="launch" class="launch">LAUNCH</button>
+    <div class="splash-foot">
+      <span>JPL Horizons ephemerides</span>
+      <span>NASA Moon Trek &middot; LRO LOLA DEM</span>
+      <span>ASU LROC QuickMap</span>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app" hidden>
+
+  <div class="titlebar">
+    <div class="lockup lockup-bar">
+      <svg class="logo-mark sm" viewBox="0 0 96 96" aria-label="NASA Space Apps Challenge">
+        <circle cx="40" cy="58" r="28" fill="none" stroke="currentColor" stroke-width="6"/>
+        <circle cx="59" cy="27" r="9.5" fill="none" stroke="currentColor" stroke-width="6"/>
+        <g stroke="currentColor" stroke-width="5" stroke-linecap="round">
+          <line x1="64" y1="20" x2="72" y2="7"/>
+          <line x1="70" y1="24" x2="84" y2="16"/>
+          <line x1="60" y1="16" x2="63" y2="3"/>
+          <line x1="76" y1="19" x2="88" y2="9"/>
+        </g>
+      </svg>
+      <div class="logo-type sm">
+        <span class="nasa">NASA</span>
+        <span class="spaceapps">SPACE APPS</span>
+      </div>
+    </div>
+    <span class="titlebar-name">Lunar Site Planner</span>
+    <div class="titlebar-right">
+      <span class="badge" id="ephemBadge">ephemeris</span>
+      <span class="badge" id="terrainBadge">terrain</span>
+      <span class="badge" id="healthBadge">cache</span>
+      <div class="win-dots"><i></i><i></i><i></i></div>
+    </div>
+  </div>
+
+  <nav class="menubar">
+    <button class="menubar-btn active" data-menu="site">SITE</button>
+    <button class="menubar-btn" data-menu="time">TIME</button>
+    <button class="menubar-btn" data-menu="analysis">ANALYSIS</button>
+    <button class="menubar-btn" data-menu="view">VIEW</button>
+    <button class="menubar-btn" data-menu="help">HELP</button>
+  </nav>
+
+  <div class="workspace">
+
+    <section class="stage">
+      <canvas id="globe"></canvas>
+      <div class="stage-overlay">
+        <div class="hud-card">
+          <div class="hud-row"><span>PHASE</span><b id="phaseName">&mdash;</b></div>
+          <div class="phase-bar"><span id="phaseBar"></span></div>
+          <div class="hud-row"><span>SUB-SOLAR</span><b id="subsolar">&mdash;</b></div>
+          <div class="hud-row"><span>SUB-EARTH</span><b id="subearth">&mdash;</b></div>
+          <div class="hud-row"><span>SEPARATION</span><b id="separation">&mdash;</b></div>
+          <div class="hud-row"><span>CATALOG</span><b id="siteCount">&mdash;</b></div>
+        </div>
+        <div class="hud-card hud-legend">
+          <span><i class="dot sel"></i>Selected</span>
+          <span><i class="dot other"></i>Catalogued</span>
+          <span><i class="star"></i>Sub-solar</span>
+        </div>
+        <div class="hud-card hud-tools">
+          <button id="spinToggle" class="mini ghost" aria-pressed="true">SPIN</button>
+          <span class="meta" id="globeMeta"></span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="dock">
+
+      <div class="dock-panel active" data-panel="site">
+        <div class="dock-head">SITE</div>
+        <div class="dock-body">
+          <label class="lbl" for="site">Landing site</label>
+          <select id="site"></select>
+          <div class="row" id="customRow" hidden>
+            <div><label class="lbl" for="lat">Latitude</label><input id="lat" type="number" step="0.001" min="-90" max="90" value="-89.66"></div>
+            <div><label class="lbl" for="lon">Longitude</label><input id="lon" type="number" step="0.001" min="-180" max="180" value="129.2"></div>
+          </div>
+          <div class="hint" id="siteNote"></div>
+          <button id="explore" class="primary wide">Explore site in 3D</button>
+          <div class="dock-sub">Catalog</div>
+          <div class="catalog" id="catalog"></div>
+          <div class="dock-sub">Terrain patch</div>
+          <div class="terrain" id="terrain"></div>
+        </div>
+      </div>
+
+      <div class="dock-panel" data-panel="time">
+        <div class="dock-head">TIME</div>
+        <div class="dock-body">
+          <label class="lbl" for="start">Start time (UTC)</label>
+          <input id="start" type="datetime-local">
+          <div class="row tight">
+            <button class="mini" data-shift="-24">-1d</button>
+            <button class="mini" data-shift="-6">-6h</button>
+            <button class="mini" data-shift="0">NOW</button>
+            <button class="mini" data-shift="6">+6h</button>
+            <button class="mini" data-shift="24">+1d</button>
+          </div>
+          <div class="dock-sub">Lunar phase</div>
+          <div class="phase-grid">
+            <button class="mini" data-phase="new">NEW</button>
+            <button class="mini" data-phase="first">1ST Q</button>
+            <button class="mini" data-phase="full">FULL</button>
+            <button class="mini" data-phase="last">LAST Q</button>
+          </div>
+          <label class="lbl" for="phase">Phase</label>
+          <select id="phase">
+            <option value="new">New Moon</option>
+            <option value="first">First Quarter</option>
+            <option value="full">Full Moon</option>
+            <option value="last">Last Quarter</option>
+          </select>
+          <div class="dock-sub">Sampling</div>
+          <div class="row">
+            <div><label class="lbl" for="hours">Window</label>
+              <select id="hours">
+                <option value="24">24 h</option>
+                <option value="168">7 days</option>
+                <option value="336">14 days</option>
+                <option value="720" selected>30 days</option>
+                <option value="1440">60 days</option>
+              </select>
+            </div>
+            <div><label class="lbl" for="step">Step</label>
+              <select id="step">
+                <option value="5">5 min</option>
+                <option value="10">10 min</option>
+                <option value="20" selected>20 min</option>
+                <option value="30">30 min</option>
+                <option value="60">60 min</option>
+              </select>
+            </div>
+          </div>
+          <button id="run" class="primary wide">Analyse site</button>
+          <div class="status" id="status"></div>
+        </div>
+      </div>
+
+      <div class="dock-panel" data-panel="analysis">
+        <div class="dock-head">ANALYSIS</div>
+        <div class="dock-body">
+          <div class="kpis" id="kpis"></div>
+          <div class="dock-sub">Horizon &amp; sky track</div>
+          <canvas id="pano" height="200"></canvas>
+          <div class="legend">
+            <span><i class="sw sun"></i>Sun</span>
+            <span><i class="sw earth"></i>Earth</span>
+            <span><i class="sw terrain"></i>Terrain</span>
+          </div>
+          <div class="dock-sub">Illumination &amp; Earth visibility</div>
+          <canvas id="timeline" height="150"></canvas>
+          <div class="scrubrow">
+            <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="time scrubber">
+            <span class="clock" id="clock"></span>
+          </div>
+          <div class="dock-sub">Raytraced light field</div>
+          <div class="mapwrap"><img id="illum" alt="Raytraced illumination map"></div>
+          <div class="legend">
+            <span><i class="sw shadow"></i>Shadowed</span>
+            <span><i class="sw lit"></i>Lit</span>
+            <span class="muted" id="mapFoot"></span>
+          </div>
+          <div class="dock-sub">At selected instant</div>
+          <div class="readout" id="readout"></div>
+          <div class="dock-sub">Scenario comparison</div>
+          <div class="row">
+            <button id="addCompare" class="mini">Add current</button>
+            <button id="clearCompare" class="mini ghost">Clear</button>
+          </div>
+          <div id="compare" class="compare muted">No scenarios added yet.</div>
+        </div>
+      </div>
+
+      <div class="dock-panel" data-panel="view">
+        <div class="dock-head">VIEW</div>
+        <div class="dock-body">
+          <button id="explore2" class="primary wide">Open site view</button>
+          <div class="hint">A first-person window on the selected site. Drag to look around the horizon, use the wheel to zoom, and W A S D to walk the surface.</div>
+          <div class="dock-sub">Globe</div>
+          <div class="stat-row"><span>Rotation</span><b id="spinState">on</b></div>
+          <div class="stat-row"><span>Markers</span><b id="markerCount">&mdash;</b></div>
+          <div class="stat-row"><span>Terrain source</span><b id="terrainState">&mdash;</b></div>
+          <div class="dock-sub">Timeline</div>
+          <div class="stat-row"><span>Sample count</span><b id="sampleCount">&mdash;</b></div>
+          <div class="stat-row"><span>Window</span><b id="windowState">&mdash;</b></div>
+          <div class="dock-sub">Data</div>
+          <div class="stat-row"><span>Ephemerides</span><b id="ephemState">&mdash;</b></div>
+          <div class="stat-row"><span>DEM cache</span><b id="cacheState">&mdash;</b></div>
+        </div>
+      </div>
+
+      <div class="dock-panel" data-panel="help">
+        <div class="dock-head">HELP</div>
+        <div class="dock-body">
+          <div class="dock-sub">What this does</div>
+          <div class="hint">Select a landing site, pick a date and lunar phase, then read the sunlight and Earth-visibility windows computed from JPL Horizons ephemerides and a raytraced LRO LOLA elevation patch.</div>
+          <div class="dock-sub">Controls</div>
+          <div class="stat-row"><span>Globe</span><b>drag &middot; click marker</b></div>
+          <div class="stat-row"><span>Site view</span><b>drag &middot; wheel &middot; WASD</b></div>
+          <div class="stat-row"><span>Timeline</span><b>click or scrub</b></div>
+          <div class="dock-sub">Sources</div>
+          <div class="stat-row"><span>Ephemerides</span><b>JPL Horizons</b></div>
+          <div class="stat-row"><span>Elevation</span><b>NASA Moon Trek / LRO LOLA</b></div>
+          <div class="stat-row"><span>Imagery</span><b>ASU LROC QuickMap</b></div>
+          <div class="dock-sub">Legend</div>
+          <div class="legend">
+            <span><i class="sw sun"></i>Sun</span>
+            <span><i class="sw earth"></i>Earth</span>
+            <span><i class="sw shadow"></i>Shadow</span>
+            <span><i class="sw lit"></i>Lit</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<div id="viewerWindow" class="viewer-window" hidden>
+  <div class="viewer-titlebar">
+    <div class="lockup lockup-mini">
+      <svg class="logo-mark xs" viewBox="0 0 96 96" aria-hidden="true">
+        <circle cx="40" cy="58" r="28" fill="none" stroke="currentColor" stroke-width="7"/>
+        <circle cx="59" cy="27" r="9.5" fill="none" stroke="currentColor" stroke-width="7"/>
+      </svg>
+      <span class="viewer-title" id="viewerTitle">SITE VIEW</span>
+    </div>
+    <div class="viewer-actions">
+      <button id="viewerRefresh" class="mini ghost">REFRESH</button>
+      <button id="viewerClose" class="mini ghost">CLOSE</button>
+    </div>
+  </div>
+  <div class="viewer-body">
+    <canvas id="viewCanvas" width="760" height="460"></canvas>
+    <div class="viewer-hud">
+      <div class="compass-wrap">
+        <div class="compass" id="compass"><span class="cn">N</span><span class="cs">S</span></div>
+      </div>
+      <div class="viewer-readout">
+        <div class="hud-row"><span>HEADING</span><b id="vHeading">&mdash;</b></div>
+        <div class="hud-row"><span>PITCH</span><b id="vPitch">&mdash;</b></div>
+        <div class="hud-row"><span>FIELD</span><b id="vZoom">&mdash;</b></div>
+        <div class="hud-row"><span>POSITION</span><b id="vPosition">&mdash;</b></div>
+        <div class="hud-row"><span>SUN</span><b id="vSun">&mdash;</b></div>
+        <div class="hud-row"><span>EARTH</span><b id="vEarth">&mdash;</b></div>
+      </div>
+    </div>
+    <div class="viewer-help">drag to look &middot; wheel to zoom &middot; W A S D to walk</div>
+  </div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/globe.js"></script>
+<script src="/static/js/viewer.js"></script>
+<script src="/static/js/charts.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
